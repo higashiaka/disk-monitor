@@ -1,16 +1,24 @@
 import sys
 import os
 
-# Ensure the directory containing this script is in the search path for imports
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.append(current_dir)
+# Standard PyInstaller and local dev path handling
+if getattr(sys, 'frozen', False):
+    # Run from bundled EXE
+    base_path = sys._MEIPASS
+else:
+    # Run from source
+    base_path = os.path.dirname(os.path.abspath(__file__))
+
+if base_path not in sys.path:
+    sys.path.insert(0, base_path)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import time
-import disk_io, disk_space, disk_temp
+import disk_io
+import disk_space
+import disk_temp
 
 app = FastAPI()
 

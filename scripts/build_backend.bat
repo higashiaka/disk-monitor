@@ -6,7 +6,7 @@ if exist "dist" rmdir /s /q "dist"
 if exist "build" rmdir /s /q "build"
 
 call venv\Scripts\activate.bat
-pyinstaller --noconfirm --onefile --windowed --name backend_main --clean --paths venv\Lib\site-packages app/main.py
+pyinstaller --noconfirm --onefile --windowed --name backend_main --clean --paths venv\Lib\site-packages --paths app app/main.py
 :: --windowed to hide console window for backend (optional, maybe keep console first for debug?)
 :: For now, let's use --console to see output in dev, but for prod build usually --windowed.
 :: But our electron app spawns it. If --windowed, we won't see stdout?
