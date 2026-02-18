@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.header {
+  flex: 0 0 auto;
+  margin-bottom: 20px;
+}
+
+.metrics-grid-container {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  /* FALLBACK: Allow scrolling if many disks exceed window height */
+  padding-right: 5px;
+  /* Room for scrollbar */
+}
+
+/* Custom scrollbar for the grid */
+.metrics-grid-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.metrics-grid-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.metrics-grid {
+  display: grid;
+  gap: 15px;
+}
+
+.disk-card {
+  border: 1px solid #444;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #333;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  min-height: 50px;
+  overflow: hidden;
+}
+
+/* Base Progress Bar Styles */
+.disk-progress-bar-wrapper {
+  width: 100%;
+  height: 10px;
+  background-color: #555;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-bar-container {
+  width: 100%;
+  max-width: 280px;
+}
+
+/* Adaptive Display Stages */
+
+@media (max-height: 600px) {
+  .disk-usage-text-extra {
+    display: none;
+  }
+}
+
+@media (max-height: 520px) {
+  .disk-io-stats {
+    display: none !important;
+  }
+
+  .header {
+    margin-bottom: 10px;
+  }
+}
+
+/* ULTRA SLIM DENSE Mode */
+@media (max-height: 480px) {
+  .header {
+    display: none !important;
+  }
+
+  .app-container {
+    padding: 10px;
+  }
+
+  .metrics-grid {
+    gap: 8px !important;
+    /* DENSE: Allow up to 3 columns if width available, otherwise wrap */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+  }
+
+  .disk-card {
+    flex-direction: row !important;
+    align-items: center !important;
+    padding: 6px 12px !important;
+    min-height: 38px !important;
+    gap: 10px;
+  }
+
+  .disk-card h3 {
+    margin: 0 !important;
+    flex: 0 0 60px;
+    font-size: 0.85rem !important;
+  }
+
+  .disk-card h3 span:last-child {
+    display: none;
+  }
+
+  .progress-bar-container {
+    flex: 1;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  .progress-bar-container>div:first-child {
+    order: 2;
+    flex: 0 0 auto;
+    margin-bottom: 0 !important;
+  }
+
+  .disk-progress-bar-wrapper {
+    order: 1;
+    flex: 1;
+    height: 6px !important;
+  }
+
+  .disk-type-label {
+    display: none !important;
+  }
+}
