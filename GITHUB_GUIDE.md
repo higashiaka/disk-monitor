@@ -55,6 +55,16 @@ git push origin v1.0.0
 
 ---
 
+## 🛠️ 권한 문제 해결 (403 Forbidden 에러 시)
+GitHub Actions에서 배포 파일을 올릴 때 `403 Forbidden` 에러가 난다면, 저장소의 권한 설정을 바꿔야 합니다.
+
+1. GitHub 저장소 상단의 **Settings** 탭을 클릭합니다.
+2. 좌측 메뉴에서 **Actions > General**로 들어갑니다.
+3. 가장 아래쪽의 **Workflow permissions** 섹션을 찾습니다.
+4. **[Read and write permissions]**를 선택하고 **Save**를 누릅니다.
+
+---
+
 ## 💡 확인 및 결과
 - **성공 확인**: `git add .` 후 `git status`를 입력했을 때 `node_modules`가 보이지 않으면 성공입니다.
 - **배포 확인**: 깃허브 페이지 상단의 **Actions** 탭에서 빌드가 돌아가는 것을 확인하고, 완료되면 **Releases** 탭에서 결과물을 다운로드하세요.

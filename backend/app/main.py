@@ -2,7 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import time
-from . import disk_io, disk_space, disk_temp
+try:
+    from . import disk_io, disk_space, disk_temp
+except ImportError:
+    import disk_io, disk_space, disk_temp
 
 app = FastAPI()
 
