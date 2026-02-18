@@ -3,14 +3,16 @@ import os
 
 # Standard PyInstaller and local dev path handling
 if getattr(sys, 'frozen', False):
-    # Run from bundled EXE
+    # Run from bundled EXE - PyInstaller unpacks assets here
     base_path = sys._MEIPASS
+    # Add base_path to sys.path to find sibling modules directly
+    if base_path not in sys.path:
+        sys.path.insert(0, base_path)
 else:
     # Run from source
     base_path = os.path.dirname(os.path.abspath(__file__))
-
-if base_path not in sys.path:
-    sys.path.insert(0, base_path)
+    if base_path not in sys.path:
+        sys.path.insert(0, base_path)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

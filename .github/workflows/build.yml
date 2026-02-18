@@ -28,7 +28,7 @@ jobs:
       - name: Build Backend EXE
         working-directory: ./backend
         run: |
-          python -m PyInstaller --onefile --noconsole --name backend_main app/main.py
+          python -m PyInstaller --onefile --noconsole --name backend_main --paths app app/main.py
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
