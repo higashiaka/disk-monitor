@@ -1,11 +1,16 @@
+import sys
+import os
+
+# Ensure the directory containing this script is in the search path for imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import time
-try:
-    from . import disk_io, disk_space, disk_temp
-except ImportError:
-    import disk_io, disk_space, disk_temp
+import disk_io, disk_space, disk_temp
 
 app = FastAPI()
 
