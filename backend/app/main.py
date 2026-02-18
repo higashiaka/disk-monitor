@@ -21,6 +21,9 @@ import time
 import disk_io
 import disk_space
 import disk_temp
+from logger import logger
+
+logger.info(f"Storage Monitor Backend starting. Frozen: {getattr(sys, 'frozen', False)}")
 
 app = FastAPI()
 
@@ -54,15 +57,27 @@ async def update_metrics_loop():
         
         # Calculate rates
         interval = curr_time - prev_time
-        io_rates = disk_io.calculate_io_rate(prev_io, curr_io, interval)
+        try:
+            io_rates = disk_io.calculate_io_rate(prev_io, curr_io, interval)
+            if not io_rates:
+                 logger.warning("No I/O rates calculated in this loop.")
+        except Exception as e:
+            logger.error(f"Error in update_metrics_loop io calc: {e}")
+            io_rates = {}
         
-        # Space info (less frequent update? for now every second is fine for simple app)
-        space_info = disk_space.get_all_disk_space_info()
+        # Space info
+        try:
+            space_info = disk_space.get_all_disk_space_info()
+        except Exception as e:
+            logger.error(f"Error in update_metrics_loop space: {e}")
+            space_info = []
         
         # Temp info
-        # temps = disk_temp.get_disk_temperatures() 
-        # Using dummy for now as it requires Admin
-        temps = disk_temp.get_dummy_temperatures() 
+        try:
+            temps = disk_temp.get_dummy_temperatures() 
+        except Exception as e:
+            logger.error(f"Error in update_metrics_loop temp: {e}")
+            temps = {}
         
         # Update global state
         current_metrics["io"] = io_rates
@@ -113,4 +128,4 @@ async def get_metrics_get():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8001)

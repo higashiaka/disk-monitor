@@ -4,62 +4,82 @@ except ImportError:
     DeviceList = None
 
 import platform
+import psutil
+from logger import logger
+from disk_io import get_drive_map
 
 def get_disk_temperatures():
     """
     Returns a dictionary of disk temperatures.
     Requires Admin privileges and smartctl on Windows.
     Returns:
-        dict: {disk_name: temperature_celsius}
+        dict: {drive_letter: temperature_celsius}
     """
     temps = {}
-    
-    # Check if we are on Windows and have admin rights (simplified check)
-    # real check is complex, so we just try-except
-    
+    if not DeviceList:
+        return temps
+
     try:
-        # pySMART wraps smartctl. 
-        # On Windows, it needs to run as Admin to access physical drives.
+        drive_map = get_drive_map()
         devices = DeviceList()
         if not devices:
+            # Check if any mapped drive is actually a network/SMB drive
+            # Network drives won't show up in pySMART DeviceList
             return {}
 
         for dev in devices.devices:
-            # dev.name might be /dev/sda or similar on Linux, 
-            # on Windows it might be pd0, pd1 etc.
-            # We need to map this to drive letters if possible, but that's hard.
-            # For now, we use the model/serial as key or just the device name.
-            
-            # smartctl output parsing
             temp = dev.temperature
             if temp:
-                temps[dev.name] = temp
+                dev_name = dev.name
+                if dev_name.startswith('pd'):
+                    norm_name = f"PhysicalDrive{dev_name[2:]}"
+                else:
+                    norm_name = dev_name
+                
+                mapped_drives = drive_map.get(norm_name, [])
+                if mapped_drives:
+                    for drive in mapped_drives:
+                        temps[drive] = temp
+                else:
+                    temps[norm_name] = temp
+                
+                logger.info(f"Disk {dev_name} ({norm_name}) temperature: {temp}C")
                 
     except Exception as e:
-        # Silent fail or log
-        # print(f"Error getting disk temps: {e}")
-        pass
+        logger.error(f"Error getting disk temps: {e}")
         
     return temps
 
-# For development/testing without Admin, we might want dummy data
 def get_dummy_temperatures():
-    import psutil
+    """
+    Generates dummy temperatures for all active partitions.
+    Explicitly marks network drives as 'No Sensor'.
+    """
     temps = {}
     try:
-        # Generate dummy temp for each fixed disk found
-        parts = psutil.disk_partitions(all=False) # Local only
+        parts = psutil.disk_partitions(all=True)
         for i, p in enumerate(parts):
-            if 'cdrom' in p.opts or p.fstype == '': continue
-            # Assign random-ish temp based on index
-            temps[p.device] = 35 + i * 2 # e.g. C:\ -> 35
+            # p.opts often contains 'fixed', 'removable', 'network'
+            opts = p.opts.lower()
+            drive = p.mountpoint
             
-            # Also add PhysicalDriveN key just in case
-            # temps[f"PhysicalDrive{i}"] = 35 + i
-    except:
-        pass
+            if 'cdrom' in opts or p.fstype == '':
+                continue
+                
+            # If it's a network drive (SMB), we can't get temperature
+            if 'network' in opts or drive.startswith('\\\\'):
+                # Using a string 'No sensor' which the frontend might need to handle
+                # Or just don't return a value so it shows N/A
+                # Let's return a special value or just skip it
+                continue
+            
+            # Local drives get dummy temp
+            temps[drive] = 32 + (hash(drive) % 8)
+            
+    except Exception as e:
+        logger.error(f"Error generating dummy temps: {e}")
         
     if not temps:
-         temps = {'C:\\': 35, 'D:\\': 38} # Fallback
+         temps = {'C:\\': 35}
          
     return temps

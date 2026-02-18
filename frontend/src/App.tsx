@@ -39,7 +39,7 @@ function App() {
         if (customPaths === null) return;
         const fetchMetrics = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8000/metrics', {
+                const response = await fetch('http://127.0.0.1:8001/metrics', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ custom_paths: customPaths })

@@ -1,4 +1,5 @@
 import psutil
+from logger import logger
 
 def list_partitions():
     """
@@ -6,9 +7,12 @@ def list_partitions():
     """
     try:
         # 'all=True' to include network drives (SMB) which are usually excluded by 'all=False' on Windows.
-        return psutil.disk_partitions(all=True)
+        parts = psutil.disk_partitions(all=True)
+        if not parts:
+            logger.warning("psutil.disk_partitions(all=True) returned no partitions.")
+        return parts
     except Exception as e:
-        print(f"Error listing partitions: {e}")
+        logger.error(f"Error listing partitions: {e}")
         return []
 
 def get_disk_usage(path):
