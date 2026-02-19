@@ -144,13 +144,14 @@ function App() {
                                         <div className="progress-bar-container">
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '0.85rem' }}>
                                                 <span className="disk-type-label" style={{ color: '#aaa' }}>{disk.fstype}</span>
-                                                <span style={{ fontWeight: 'bold' }}>{disk.percent}% Used</span>
+                                                <span style={{ fontWeight: 'bold' }}>Free: {formatBytes(disk.free)}</span>
                                             </div>
                                             <div className="disk-progress-bar-wrapper">
                                                 <div style={{ width: `${disk.percent}%`, height: '100%', backgroundColor: disk.percent > 90 ? '#ff4444' : '#4caf50', transition: 'width 0.5s' }}></div>
                                             </div>
-                                            <div className="disk-usage-text-extra" style={{ fontSize: '0.75rem', color: '#ccc', marginTop: '4px', textAlign: 'right' }}>
-                                                {formatBytes(disk.used)} / {formatBytes(disk.total)}
+                                            <div className="disk-usage-text-extra" style={{ fontSize: '0.75rem', color: '#ccc', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                                                <span style={{ fontWeight: 'bold' }}>{disk.percent}% Used</span>
+                                                <span>{formatBytes(disk.used)} / {formatBytes(disk.total)}</span>
                                             </div>
                                         </div>
                                     </div>

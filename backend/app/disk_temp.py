@@ -53,27 +53,18 @@ def get_disk_temperatures():
 def get_dummy_temperatures():
     """
     Generates dummy temperatures for all active partitions.
-    Explicitly marks network drives as 'No Sensor'.
     """
     temps = {}
     try:
+        # Generate dummy temp for each fixed disk/partition found
         parts = psutil.disk_partitions(all=True)
         for i, p in enumerate(parts):
-            # p.opts often contains 'fixed', 'removable', 'network'
-            opts = p.opts.lower()
+            if 'cdrom' in p.opts or p.fstype == '':
+                continue
+            
+            # Use mountpoint (e.g. C:\) as key, same as frontend expects
             drive = p.mountpoint
-            
-            if 'cdrom' in opts or p.fstype == '':
-                continue
-                
-            # If it's a network drive (SMB), we can't get temperature
-            if 'network' in opts or drive.startswith('\\\\'):
-                # Using a string 'No sensor' which the frontend might need to handle
-                # Or just don't return a value so it shows N/A
-                # Let's return a special value or just skip it
-                continue
-            
-            # Local drives get dummy temp
+            # Assign random-ish consistent temp
             temps[drive] = 32 + (hash(drive) % 8)
             
     except Exception as e:

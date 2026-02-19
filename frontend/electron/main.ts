@@ -14,7 +14,7 @@ const backendPath = isDev
     : path.join(process.resourcesPath, 'backend/backend_main.exe'); // Run via exe in prod
 
 const backendArgs = isDev
-    ? ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', '8000']
+    ? ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', '8001']
     : [];
 
 function startBackend() {
@@ -24,12 +24,14 @@ function startBackend() {
         // In dev, we execute python with module args, cwd must be backend root
         backendProcess = spawn(backendPath, backendArgs, {
             cwd: path.join(__dirname, '../../backend'),
-            stdio: 'inherit' // Pipe stdout/stderr to parent
+            stdio: 'inherit', // Pipe stdout/stderr to parent
+            windowsHide: true // Hide console window on Windows
         });
     } else {
         // In prod, just execute the exe
         backendProcess = spawn(backendPath, [], {
-            stdio: 'inherit'
+            stdio: 'inherit',
+            windowsHide: true
         });
     }
 
