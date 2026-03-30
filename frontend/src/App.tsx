@@ -24,11 +24,16 @@ function App() {
     const [customPaths, setCustomPaths] = useState<string[] | null>(null);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isOverlay, setIsOverlay] = useState(false);
+    const [backendUrl, setBackendUrl] = useState<string>('http://127.0.0.1:8001');
+    const [remoteBackendUrl, setRemoteBackendUrl] = useState<string>('');
 
     useEffect(() => {
         if (window.electron && window.electron.invoke) {
             window.electron.invoke('get-settings').then((settings: any) => {
                 setCustomPaths(settings.customPaths || []);
+                const remote = settings.remoteBackendUrl || '';
+                setRemoteBackendUrl(remote);
+                setBackendUrl(remote.trim() !== '' ? remote.trim() : 'http://127.0.0.1:8001');
             });
         } else {
             setCustomPaths([]);
@@ -39,7 +44,7 @@ function App() {
         if (customPaths === null) return;
         const fetchMetrics = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8001/metrics', {
+                const response = await fetch(`${backendUrl}/metrics`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ custom_paths: customPaths })
@@ -55,7 +60,7 @@ function App() {
         const intervalId = setInterval(fetchMetrics, 1000);
         fetchMetrics();
         return () => clearInterval(intervalId);
-    }, [customPaths]);
+    }, [customPaths, backendUrl]);
 
     const toggleOverlay = async () => {
         const newState = !isOverlay;
@@ -69,10 +74,16 @@ function App() {
         }
     };
 
-    const saveCustomPaths = async (newPaths: string[]) => {
+    const saveSettings = async (newPaths: string[], newRemoteUrl: string) => {
         setCustomPaths(newPaths);
+        const trimmed = newRemoteUrl.trim();
+        setRemoteBackendUrl(trimmed);
+        setBackendUrl(trimmed !== '' ? trimmed : 'http://127.0.0.1:8001');
         if (window.electron && window.electron.invoke) {
-            await window.electron.invoke('save-settings', { customPaths: newPaths });
+            await window.electron.invoke('save-settings', {
+                customPaths: newPaths,
+                remoteBackendUrl: trimmed
+            });
         }
     };
 
@@ -113,7 +124,8 @@ function App() {
                     isOpen={isSettingsOpen}
                     onClose={() => setIsSettingsOpen(false)}
                     customPaths={customPaths}
-                    onSavePaths={saveCustomPaths}
+                    remoteBackendUrl={remoteBackendUrl}
+                    onSave={saveSettings}
                 />
             )}
 

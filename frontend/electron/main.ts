@@ -59,7 +59,8 @@ const settingsPath = path.join(app.getPath('userData'), 'settings.json');
 const defaultSettings = {
     windowBounds: { width: 1000, height: 700 },
     customPaths: [] as string[],
-    isOverlay: false
+    isOverlay: false,
+    remoteBackendUrl: ''
 };
 
 function loadSettings() {
@@ -142,6 +143,11 @@ ipcMain.handle('open-settings-folder', () => {
     return true;
 });
 
+ipcMain.handle('get-backend-url', () => {
+    const remote = currentSettings.remoteBackendUrl;
+    return (remote && remote.trim() !== '') ? remote.trim() : 'http://127.0.0.1:8001';
+});
+
 ipcMain.handle('toggle-overlay', (event, enable: boolean) => {
     if (!mainWindow) return;
     if (enable) {
@@ -154,8 +160,17 @@ ipcMain.handle('toggle-overlay', (event, enable: boolean) => {
 });
 
 
+function isRemoteBackendConfigured(): boolean {
+    const url = currentSettings.remoteBackendUrl;
+    return !!(url && url.trim() !== '');
+}
+
 app.whenReady().then(() => {
-    startBackend();
+    if (!isRemoteBackendConfigured()) {
+        startBackend();
+    } else {
+        console.log(`Remote backend configured: ${currentSettings.remoteBackendUrl} — skipping local backend.`);
+    }
     createWindow();
 
     app.on('activate', () => {

@@ -25,10 +25,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Build Backend EXE
+      - name: Build Backend EXE (embedded)
         working-directory: ./backend
         run: |
           python -m PyInstaller --onefile --noconsole --name backend_main --paths app app/main.py
+
+      - name: Build Backend Server EXE (standalone remote)
+        working-directory: ./backend
+        run: |
+          python -m PyInstaller --onefile --console --name backend_server --paths app backend_server.py
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -54,5 +59,6 @@ jobs:
           files: |
             frontend/release/*.exe
             frontend/release/*.blockmap
+            backend/dist/backend_server.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
